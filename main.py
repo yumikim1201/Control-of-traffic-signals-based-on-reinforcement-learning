@@ -17,6 +17,7 @@ learning_rate = 0.0005
 gamma = 0.98
 buffer_limit = 50000
 batch_size = 32
+print_interval = 50
 
 class ReplayBuffer():
     def __init__(self):
@@ -81,7 +82,7 @@ def train(q, q_target, memory, optimizer, n_epi):  # Q-learning으로 학습 -> 
         loss.backward()
         optimizer.step()
 
-    if n_epi % 200 == 0:
+    if n_epi % print_interval == 0:
         plt_aveCosts.append(loss)
 
 
@@ -95,11 +96,10 @@ def main():
     q_target.load_state_dict(q.state_dict())
     memory = ReplayBuffer()
 
-    print_interval = 20
     score = 0.0
     optimizer = optim.Adam(q.parameters(), lr=learning_rate)
 
-    for n_epi in range(5000):
+    for n_epi in range(6000):
         print(n_epi)
         epsilon = max(0.01, 0.08 - 0.01 * (n_epi / 200))  # Linear annealing from 8% to 1%
         state = env.reset()
@@ -109,17 +109,17 @@ def main():
             action = q.sample_action(torch.tensor(state).float(), epsilon)
             #print(action)
             state_prime, reward, done = env.step(action)  # 선택된 action -> return
+            #print(reward)
             done_mask = 0.0 if done else 1.0
             memory.put((state, action, reward, state_prime, done_mask))  # memory append
-
             state = state_prime
             score += reward
-            if done or t == 2000:
+            if done or t == 3000:
                 break
             t = t + 1
         if memory.size() > 3000:  # episode 4회 이상
             train(q, q_target, memory, optimizer, n_epi)
-            if n_epi % 200 == 0:
+            if n_epi % print_interval == 0:
                 plt_episodeLoss.append(n_epi)
 
         if n_epi % print_interval == 0 and n_epi != 0:

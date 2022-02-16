@@ -1,6 +1,6 @@
 import random
 
-# Hyperparameters
+# Parameters
 
 time_theta = 0.3
 
@@ -8,32 +8,34 @@ K = 30 #한번 신호가 열렸을 때 차량의 처리율
 
 seconds = 30  #신호 주기 == K배 (00초에 1대)
 
+gamma_input = 10
+
 class Traffic_Signal_Control():
     def __init__(self):
 
         self.LeftNum = []
-        self.LeftNum.append(random.randint(1, 50))
-        self.LeftNum.append(random.randint(1, 50))
-        self.LeftNum.append(random.randint(1, 50))
+        self.LeftNum.append(random.randint(1, 10))
+        self.LeftNum.append(random.randint(1, 30))
+        self.LeftNum.append(random.randint(1, 20))
         self.LeftNum.append(random.randint(1, 50))
 
         self.StraightNum = []
-        self.StraightNum.append(random.randint(1, 50))
-        self.StraightNum.append(random.randint(1, 50))
-        self.StraightNum.append(random.randint(1, 50))
+        self.StraightNum.append(random.randint(1, 10))
+        self.StraightNum.append(random.randint(1, 30))
+        self.StraightNum.append(random.randint(1, 20))
         self.StraightNum.append(random.randint(1, 50))
 
 
         self.LeftTime = []
         self.LeftTime.append([])
         for i in range(0, self.LeftNum[0]):
-            self.LeftTime[0].append(random.randint(1, 50))
+            self.LeftTime[0].append(random.randint(1, 10))
         self.LeftTime.append([])
         for i in range(0, self.LeftNum[1]):
-            self.LeftTime[1].append(random.randint(1, 50))
+            self.LeftTime[1].append(random.randint(1, 30))
         self.LeftTime.append([])
         for i in range(0, self.LeftNum[2]):
-            self.LeftTime[2].append(random.randint(1, 50))
+            self.LeftTime[2].append(random.randint(1, 20))
         self.LeftTime.append([])
         for i in range(0, self.LeftNum[3]):
             self.LeftTime[3].append(random.randint(1, 50))
@@ -44,13 +46,13 @@ class Traffic_Signal_Control():
         self.StraightTime = []
         self.StraightTime.append([])
         for i in range(0, self.StraightNum[0]):
-            self.StraightTime[0].append(random.randint(1, 50))
+            self.StraightTime[0].append(random.randint(1, 10))
         self.StraightTime.append([])
         for i in range(0, self.StraightNum[1]):
-            self.StraightTime[1].append(random.randint(1, 50))
+            self.StraightTime[1].append(random.randint(1, 30))
         self.StraightTime.append([])
         for i in range(0, self.StraightNum[2]):
-            self.StraightTime[2].append(random.randint(1, 50))
+            self.StraightTime[2].append(random.randint(1, 20))
         self.StraightTime.append([])
         for i in range(0, self.StraightNum[3]):
             self.StraightTime[3].append(random.randint(1, 50))
@@ -139,12 +141,12 @@ class Traffic_Signal_Control():
         next_Time = leftTime + straightTime
         next_Num = self.StraightNum + self.LeftNum
 
-        #reward = - sum(next_Num) 16
+        #reward = - sum(next_Num) #200
         #reward = - next_Time #300
-        reward = -(0.8 * sum(next_Num) + 0.2 * next_Time)
+        reward = -(0.7 * sum(next_Num) + 0.3 * next_Time)
 
         #print(reward)
-        if reward >= -300:
+        if reward >= -200:
             done = True
         else:
             done = False
@@ -161,7 +163,7 @@ class Traffic_Signal_Control():
     def move_StraightOdd(self):
         gamma = []
         for i in range(0, 8):
-            gamma.append(random.randint(1, 10))
+            gamma.append(random.randint(0, gamma_input))
         self.StraightNum[1] = self.StraightNum[1] - K
         self.StraightNum[3] = self.StraightNum[3] - K
 
@@ -172,8 +174,8 @@ class Traffic_Signal_Control():
             self.StraightNum[3] = 0
 
         for i in range(0, 4):
-            self.StraightNum[i] = self.StraightNum[i] + gamma[0]
-            self.LeftNum[i] = self.LeftNum[i] + gamma[0]
+            self.StraightNum[i] = self.StraightNum[i] + gamma[i]
+            self.LeftNum[i] = self.LeftNum[i] + gamma[i+4]
 
         if len(self.StraightTime[1]) >= K and len(self.StraightTime[3]) >= K:
             del self.StraightTime[1][:K]
@@ -197,17 +199,17 @@ class Traffic_Signal_Control():
                     self.LeftTime[j][i] = self.LeftTime[j][i] + seconds
 
         for j in range(0, 4):
-            for i in range(0, gamma[0]):
+            for i in range(0, gamma[j]):
                 self.StraightTime[j].append(1)
 
         for j in range(0, 4):
-            for i in range(0, gamma[0]):
+            for i in range(0, gamma[j+4]):
                 self.LeftTime[j].append(1)
 
     def move_StraightEven(self):
         gamma = []
         for i in range(0, 8):
-            gamma.append(random.randint(1, 10))
+            gamma.append(random.randint(0, gamma_input))
         self.StraightNum[0] = self.StraightNum[0] - K
         self.StraightNum[2] = self.StraightNum[2] - K
 
@@ -218,8 +220,8 @@ class Traffic_Signal_Control():
             self.StraightNum[2] = 0
 
         for i in range(0, 4):
-            self.StraightNum[i] = self.StraightNum[i] + gamma[1]
-            self.LeftNum[i] = self.LeftNum[i] + gamma[1]
+            self.StraightNum[i] = self.StraightNum[i] + gamma[i]
+            self.LeftNum[i] = self.LeftNum[i] + gamma[i+4]
 
         if len(self.StraightTime[0]) >= K and len(self.StraightTime[2]) >= K:
             del self.StraightTime[0][:K]
@@ -242,17 +244,17 @@ class Traffic_Signal_Control():
                     self.LeftTime[j][i] = self.LeftTime[j][i] + seconds
 
         for j in range(0, 4):
-            for i in range(0, gamma[1]):
+            for i in range(0, gamma[j]):
                 self.StraightTime[j].append(1)
 
         for j in range(0, 4):
-            for i in range(0, gamma[1]):
+            for i in range(0, gamma[j+4]):
                 self.LeftTime[j].append(1)
 
     def move_StraightLeft0(self):
         gamma = []
         for i in range(0, 8):
-            gamma.append(random.randint(1, 10))
+            gamma.append(random.randint(0, gamma_input))
         self.StraightNum[0] = self.StraightNum[0] - K
         self.LeftNum[0] = self.LeftNum[0] - K
 
@@ -263,8 +265,8 @@ class Traffic_Signal_Control():
             self.LeftNum[0] = 0
 
         for i in range(0, 4):
-            self.StraightNum[i] = self.StraightNum[i] + gamma[2]
-            self.LeftNum[i] = self.LeftNum[i] + gamma[2]
+            self.StraightNum[i] = self.StraightNum[i] + gamma[i]
+            self.LeftNum[i] = self.LeftNum[i] + gamma[i+4]
 
         if len(self.StraightTime[0]) >= K and len(self.LeftTime[0]) >= K:
             del self.StraightTime[0][:K]
@@ -287,17 +289,17 @@ class Traffic_Signal_Control():
                     self.LeftTime[j][i] = self.LeftTime[j][i] + seconds
 
         for j in range(0, 4):
-            for i in range(0, gamma[2]):
+            for i in range(0, gamma[j]):
                 self.StraightTime[j].append(1)
 
         for j in range(0, 4):
-            for i in range(0, gamma[2]):
+            for i in range(0, gamma[j+4]):
                 self.LeftTime[j].append(1)
 
     def move_StraightLeft1(self):
         gamma = []
         for i in range(0, 8):
-            gamma.append(random.randint(1, 10))
+            gamma.append(random.randint(0, gamma_input))
         self.StraightNum[1] = self.StraightNum[1] - K
         self.LeftNum[1] = self.LeftNum[1] - K
 
@@ -308,8 +310,8 @@ class Traffic_Signal_Control():
             self.LeftNum[1] = 0
 
         for i in range(0, 4):
-            self.StraightNum[i] = self.StraightNum[i] + gamma[3]
-            self.LeftNum[i] = self.LeftNum[i] + gamma[3]
+            self.StraightNum[i] = self.StraightNum[i] + gamma[i]
+            self.LeftNum[i] = self.LeftNum[i] + gamma[i+4]
 
         if len(self.StraightTime[1]) >= K and len(self.LeftTime[1]) >= K:
             del self.StraightTime[1][:K]
@@ -331,17 +333,17 @@ class Traffic_Signal_Control():
                     self.LeftTime[j][i] = self.LeftTime[j][i] + seconds
 
         for j in range(0, 4):
-            for i in range(0, gamma[3]):
+            for i in range(0, gamma[j]):
                 self.StraightTime[j].append(1)
 
         for j in range(0, 4):
-            for i in range(0, gamma[3]):
+            for i in range(0, gamma[j+4]):
                 self.LeftTime[j].append(1)
 
     def move_StraightLeft2(self):
         gamma = []
         for i in range(0, 8):
-            gamma.append(random.randint(1, 10))
+            gamma.append(random.randint(0, gamma_input))
         self.StraightNum[2] = self.StraightNum[2] - K
         self.LeftNum[2] = self.LeftNum[2] - K
 
@@ -352,8 +354,8 @@ class Traffic_Signal_Control():
             self.LeftNum[2] = 0
 
         for i in range(0, 4):
-            self.StraightNum[i] = self.StraightNum[i] + gamma[4]
-            self.LeftNum[i] = self.LeftNum[i] + gamma[4]
+            self.StraightNum[i] = self.StraightNum[i] + gamma[i]
+            self.LeftNum[i] = self.LeftNum[i] + gamma[i+4]
 
         if len(self.StraightTime[2]) >= K and len(self.LeftTime[2]) >= K:
             del self.StraightTime[2][:K]
@@ -375,17 +377,17 @@ class Traffic_Signal_Control():
                     self.LeftTime[j][i] = self.LeftTime[j][i] + seconds
 
         for j in range(0, 4):
-            for i in range(0, gamma[4]):
+            for i in range(0, gamma[j]):
                 self.StraightTime[j].append(1)
 
         for j in range(0, 4):
-            for i in range(0, gamma[4]):
+            for i in range(0, gamma[j+4]):
                 self.LeftTime[j].append(1)
 
     def move_StraightLeft3(self):
         gamma = []
         for i in range(0, 8):
-            gamma.append(random.randint(1, 10))
+            gamma.append(random.randint(0, gamma_input))
         self.StraightNum[3] = self.StraightNum[3] - K
         self.LeftNum[3] = self.LeftNum[3] - K
 
@@ -396,8 +398,8 @@ class Traffic_Signal_Control():
             self.LeftNum[3] = 0
 
         for i in range(0, 4):
-            self.StraightNum[i] = self.StraightNum[i] + gamma[5]
-            self.LeftNum[i] = self.LeftNum[i] + gamma[5]
+            self.StraightNum[i] = self.StraightNum[i] + gamma[i]
+            self.LeftNum[i] = self.LeftNum[i] + gamma[i+4]
 
         if len(self.StraightTime[3]) >= K and len(self.LeftTime[3]) >= K:
             del self.StraightTime[3][:K]
@@ -419,17 +421,17 @@ class Traffic_Signal_Control():
                     self.LeftTime[j][i] = self.LeftTime[j][i] + seconds
 
         for j in range(0, 4):
-            for i in range(0, gamma[5]):
+            for i in range(0, gamma[j]):
                 self.StraightTime[j].append(1)
 
         for j in range(0, 4):
-            for i in range(0, gamma[5]):
+            for i in range(0, gamma[j+4]):
                 self.LeftTime[j].append(1)
 
     def move_LeftOdd(self):
         gamma = []
         for i in range(0, 8):
-            gamma.append(random.randint(1, 10))
+            gamma.append(random.randint(0, gamma_input))
         self.LeftNum[1] = self.LeftNum[1] - K
         self.LeftNum[3] = self.LeftNum[3] - K
 
@@ -440,8 +442,8 @@ class Traffic_Signal_Control():
             self.LeftNum[3] = 0
 
         for i in range(0, 4):
-            self.StraightNum[i] = self.StraightNum[i] + gamma[6]
-            self.LeftNum[i] = self.LeftNum[i] + gamma[6]
+            self.StraightNum[i] = self.StraightNum[i] + gamma[i]
+            self.LeftNum[i] = self.LeftNum[i] + gamma[i+4]
 
         if len(self.LeftTime[1]) >= K and len(self.LeftTime[3]) >= K:
             del self.LeftTime[1][:K]
@@ -463,17 +465,17 @@ class Traffic_Signal_Control():
                     self.LeftTime[j][i] = self.LeftTime[j][i] + seconds
 
         for j in range(0, 4):
-            for i in range(0, gamma[6]):
+            for i in range(0, gamma[j]):
                 self.StraightTime[j].append(1)
 
         for j in range(0, 4):
-            for i in range(0, gamma[6]):
+            for i in range(0, gamma[j+4]):
                 self.LeftTime[j].append(1)
 
     def move_LeftEven(self):
         gamma = []
         for i in range(0, 8):
-            gamma.append(random.randint(1, 10))
+            gamma.append(random.randint(0, gamma_input))
         self.LeftNum[0] = self.LeftNum[0] - K
         self.LeftNum[2] = self.LeftNum[2] - K
 
@@ -484,8 +486,8 @@ class Traffic_Signal_Control():
             self.LeftNum[2] = 0
 
         for i in range(0, 4):
-            self.StraightNum[i] = self.StraightNum[i] + gamma[7]
-            self.LeftNum[i] = self.LeftNum[i] + gamma[7]
+            self.StraightNum[i] = self.StraightNum[i] + gamma[i]
+            self.LeftNum[i] = self.LeftNum[i] + gamma[i+4]
 
         if len(self.LeftTime[0]) >= K and len(self.LeftTime[2]) >= K:
             del self.LeftTime[0][:K]
@@ -507,11 +509,11 @@ class Traffic_Signal_Control():
                     self.LeftTime[j][i] = self.LeftTime[j][i] + seconds
 
         for j in range(0, 4):
-            for i in range(0, gamma[7]):
+            for i in range(0, gamma[j]):
                 self.StraightTime[j].append(1)
 
         for j in range(0, 4):
-            for i in range(0, gamma[7]):
+            for i in range(0, gamma[j+4]):
                 self.LeftTime[j].append(1)
 
     def reset(self):
