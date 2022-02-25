@@ -158,12 +158,13 @@ class Traffic_Signal_Control():
             , self.StraightNum[0], self.StraightNum[1], self.StraightNum[2], self.StraightNum[3]
             , self.LeftTime[0][0], self.LeftTime[1][0], self.LeftTime[2][0], self.LeftTime[3][0]
             , self.StraightTime[0][0], self.StraightTime[1][0], self.StraightTime[2][0], self.StraightTime[3][0]
-        ), reward, done
+        ), reward, next_Time, sum(next_Num), done
 
     def move_StraightOdd(self, gamma_input):
         gamma = []
         for i in range(0, 8):
-            gamma.append(random.randint(0, gamma_input))
+            gamma.append(gamma_input)
+
         self.StraightNum[1] = self.StraightNum[1] - K
         self.StraightNum[3] = self.StraightNum[3] - K
 
@@ -209,7 +210,7 @@ class Traffic_Signal_Control():
     def move_StraightEven(self, gamma_input):
         gamma = []
         for i in range(0, 8):
-            gamma.append(random.randint(0, gamma_input))
+            gamma.append(gamma_input)
         self.StraightNum[0] = self.StraightNum[0] - K
         self.StraightNum[2] = self.StraightNum[2] - K
 
@@ -254,7 +255,7 @@ class Traffic_Signal_Control():
     def move_StraightLeft0(self, gamma_input):
         gamma = []
         for i in range(0, 8):
-            gamma.append(random.randint(0, gamma_input))
+            gamma.append(gamma_input)
         self.StraightNum[0] = self.StraightNum[0] - K
         self.LeftNum[0] = self.LeftNum[0] - K
 
@@ -299,7 +300,7 @@ class Traffic_Signal_Control():
     def move_StraightLeft1(self, gamma_input):
         gamma = []
         for i in range(0, 8):
-            gamma.append(random.randint(0, gamma_input))
+            gamma.append(gamma_input)
         self.StraightNum[1] = self.StraightNum[1] - K
         self.LeftNum[1] = self.LeftNum[1] - K
 
@@ -343,7 +344,7 @@ class Traffic_Signal_Control():
     def move_StraightLeft2(self, gamma_input):
         gamma = []
         for i in range(0, 8):
-            gamma.append(random.randint(0, gamma_input))
+            gamma.append(gamma_input)
         self.StraightNum[2] = self.StraightNum[2] - K
         self.LeftNum[2] = self.LeftNum[2] - K
 
@@ -387,7 +388,7 @@ class Traffic_Signal_Control():
     def move_StraightLeft3(self, gamma_input):
         gamma = []
         for i in range(0, 8):
-            gamma.append(random.randint(0, gamma_input))
+            gamma.append(gamma_input)
         self.StraightNum[3] = self.StraightNum[3] - K
         self.LeftNum[3] = self.LeftNum[3] - K
 
@@ -431,7 +432,7 @@ class Traffic_Signal_Control():
     def move_LeftOdd(self, gamma_input):
         gamma = []
         for i in range(0, 8):
-            gamma.append(random.randint(0, gamma_input))
+            gamma.append(gamma_input)
         self.LeftNum[1] = self.LeftNum[1] - K
         self.LeftNum[3] = self.LeftNum[3] - K
 
@@ -475,7 +476,7 @@ class Traffic_Signal_Control():
     def move_LeftEven(self, gamma_input):
         gamma = []
         for i in range(0, 8):
-            gamma.append(random.randint(0, gamma_input))
+            gamma.append(gamma_input)
         self.LeftNum[0] = self.LeftNum[0] - K
         self.LeftNum[2] = self.LeftNum[2] - K
 

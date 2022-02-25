@@ -7,8 +7,10 @@ import torch.nn.functional as F
 import torch.optim as optim
 import matplotlib.pyplot as plt
 
-plt_aveRLTSC = []
-plt_aveFTTSC = []
+plt_TimeRLTSC = []
+plt_NumRLTSC = []
+plt_TimeFTTSC = []
+plt_NumFTTSC = []
 
 gamma_input = [2, 4, 6, 8, 10]
 
@@ -106,7 +108,7 @@ def main():
             while not done:
                 action = q.sample_action(torch.tensor(state).float(), epsilon)
                 #print(action)
-                state_prime, reward, done = env.step(action, gamma_input[i])  # 선택된 action -> return
+                state_prime, reward, next_Time, next_Num, done = env.step(action, gamma_input[i])  # 선택된 action -> return
                 #print(reward)
                 done_mask = 0.0 if done else 1.0
                 memory.put((state, action, reward, state_prime, done_mask))  # memory append
@@ -120,27 +122,36 @@ def main():
 
             if n_epi % print_interval == 0 and n_epi != 0:
                 q_target.load_state_dict(q.state_dict())
-        plt_aveRLTSC.append(reward)
-        print(plt_aveRLTSC)
+        plt_TimeRLTSC.append(next_Time)
+        plt_NumRLTSC.append(next_Num)
+        print(plt_TimeRLTSC)
+        print(plt_NumRLTSC)
     #env.close()
-
-        score = 0.0
         for n_epi in range(100):
             print(n_epi)
             for action in range(0, 8):
-                state_prime, reward, done = env.step(action, gamma_input[i])
+                state_prime, reward, next_Time, next_Num, done = env.step(action, gamma_input[i])
                 state = state_prime
-                score = reward
-        plt_aveFTTSC.append(-score/10)
+        plt_TimeFTTSC.append(next_Time/10)
+        plt_NumFTTSC.append(next_Num)
         # score = 0.0
-        print(plt_aveFTTSC)
+        print(plt_TimeFTTSC)
+        print(plt_NumFTTSC)
 
 if __name__ == '__main__':
     main()
-    plt.plot(gamma_input, plt_aveRLTSC, 'r*-', label='RLTSC')
-    plt.plot(gamma_input, plt_aveFTTSC, 'b^-', label='FTTSC/100')
+    plt.plot(gamma_input, plt_NumRLTSC, 'r*-', label='RL')
+    plt.plot(gamma_input, plt_NumFTTSC, 'b^-', label='Fix')
     plt.xlabel('gamma')
-    plt.ylabel('average_reward')
-    plt.ylim([10, 30000])
+    plt.ylabel('Num')
+    #plt.ylim([0, 3000])
+    plt.legend(loc='best', ncol=1)
+    plt.show()
+
+    plt.plot(gamma_input, plt_TimeRLTSC, 'r*-', label='RL')
+    plt.plot(gamma_input, plt_TimeFTTSC, 'b^-', label='Fix/10')
+    plt.xlabel('gamma')
+    plt.ylabel('Time')
+    # plt.ylim([0, 3000])
     plt.legend(loc='best', ncol=1)
     plt.show()
