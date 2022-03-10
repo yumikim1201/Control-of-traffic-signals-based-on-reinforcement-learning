@@ -86,7 +86,7 @@ class Traffic_Signal_Control():
 
         return(list_Numsum, list_Timesum)
 
-    def step(self, action):
+    def step(self, action, alpha):
         list_num, list_time = self.sum_of_state_by_aciton()
 
         """
@@ -137,11 +137,11 @@ class Traffic_Signal_Control():
             straightTime += self.StraightTime[i][0]
 
         next_Time = leftTime + straightTime
-        next_Num = self.StraightNum + self.LeftNum
+        next_Num = sum(self.StraightNum + self.LeftNum)
 
         #reward = - sum(next_Num) #200
         #reward = - next_Time #300
-        reward = -(0.1 * sum(next_Num) + 0.9 * next_Time)
+        reward = -((alpha * next_Num) + ((1 - alpha) * next_Time))
 
         #print(reward)
         if reward >= -300:
@@ -156,7 +156,7 @@ class Traffic_Signal_Control():
             , self.StraightNum[0], self.StraightNum[1], self.StraightNum[2], self.StraightNum[3]
             , self.LeftTime[0][0], self.LeftTime[1][0], self.LeftTime[2][0], self.LeftTime[3][0]
             , self.StraightTime[0][0], self.StraightTime[1][0], self.StraightTime[2][0], self.StraightTime[3][0]
-        ), reward, done
+        ), reward, next_Time, next_Num, done
 
     def move_StraightOdd(self):
         gamma = []
