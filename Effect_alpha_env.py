@@ -517,30 +517,30 @@ class Traffic_Signal_Control():
     def reset(self):
 
         self.LeftNum = []
+        self.LeftNum.append(random.randint(1, 10))
+        self.LeftNum.append(random.randint(1, 30))
         self.LeftNum.append(random.randint(1, 20))
-        self.LeftNum.append(random.randint(1, 20))
-        self.LeftNum.append(random.randint(1, 20))
-        self.LeftNum.append(random.randint(1, 20))
+        self.LeftNum.append(random.randint(1, 50))
 
         self.StraightNum = []
+        self.StraightNum.append(random.randint(1, 10))
+        self.StraightNum.append(random.randint(1, 30))
         self.StraightNum.append(random.randint(1, 20))
-        self.StraightNum.append(random.randint(1, 20))
-        self.StraightNum.append(random.randint(1, 20))
-        self.StraightNum.append(random.randint(1, 20))
+        self.StraightNum.append(random.randint(1, 50))
 
         self.LeftTime = []
         self.LeftTime.append([])
         for i in range(0, self.LeftNum[0]):
-            self.LeftTime[0].append(random.randint(1, 20))
+            self.LeftTime[0].append(random.randint(1, 10))
         self.LeftTime.append([])
         for i in range(0, self.LeftNum[1]):
-            self.LeftTime[1].append(random.randint(1, 20))
+            self.LeftTime[1].append(random.randint(1, 30))
         self.LeftTime.append([])
         for i in range(0, self.LeftNum[2]):
             self.LeftTime[2].append(random.randint(1, 20))
         self.LeftTime.append([])
         for i in range(0, self.LeftNum[3]):
-            self.LeftTime[3].append(random.randint(1, 20))
+            self.LeftTime[3].append(random.randint(1, 50))
 
         for i in range(0, 4):
             self.LeftTime[i].sort()
@@ -548,16 +548,16 @@ class Traffic_Signal_Control():
         self.StraightTime = []
         self.StraightTime.append([])
         for i in range(0, self.StraightNum[0]):
-            self.StraightTime[0].append(random.randint(1, 20))
+            self.StraightTime[0].append(random.randint(1, 10))
         self.StraightTime.append([])
         for i in range(0, self.StraightNum[1]):
-            self.StraightTime[1].append(random.randint(1, 20))
+            self.StraightTime[1].append(random.randint(1, 30))
         self.StraightTime.append([])
         for i in range(0, self.StraightNum[2]):
             self.StraightTime[2].append(random.randint(1, 20))
         self.StraightTime.append([])
         for i in range(0, self.StraightNum[3]):
-            self.StraightTime[3].append(random.randint(1, 20))
+            self.StraightTime[3].append(random.randint(1, 50))
 
         for i in range(0, 4):
             self.StraightTime[i].sort()
