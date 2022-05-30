@@ -12,7 +12,7 @@ plt_NumRLTSC = []
 plt_TimeFTTSC = []
 plt_NumFTTSC = []
 
-gamma_input = [2, 4, 6, 8, 10]
+gamma_input = [10, 20, 30, 40, 50]
 
 # Hyperparameters
 learning_rate = 0.0005
@@ -53,7 +53,7 @@ class Qnet(nn.Module):
         super(Qnet, self).__init__()
         self.fc1 = nn.Linear(16, 256)
         self.fc2 = nn.Linear(256, 256)
-        self.fc3 = nn.Linear(256, 16)
+        self.fc3 = nn.Linear(256, 8)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
@@ -87,19 +87,19 @@ def train(q, q_target, memory, optimizer, n_epi):  # Q-learning으로 학습 -> 
 
 
 def main():
-    # CartPole 환경 구성
-    env = Traffic_Signal_Control()
-
-    # 모델 불러오기
-    q = Qnet()
-    q_target = Qnet()
-    q_target.load_state_dict(q.state_dict())
-    memory = ReplayBuffer()
-
-    optimizer = optim.Adam(q.parameters(), lr=learning_rate)
     for i in range(0, 5):
+        # CartPole 환경 구성
+        env = Traffic_Signal_Control()
+
+        # 모델 불러오기
+        q = Qnet()
+        q_target = Qnet()
+        q_target.load_state_dict(q.state_dict())
+        memory = ReplayBuffer()
+
+        optimizer = optim.Adam(q.parameters(), lr=learning_rate)
         score = 0.0
-        for n_epi in range(6000):
+        for n_epi in range(4000):
             print(n_epi)
             epsilon = max(0.01, 0.08 - 0.01 * (n_epi / 200))  # Linear annealing from 8% to 1%
             state = env.reset()
@@ -132,7 +132,7 @@ def main():
             for action in range(0, 8):
                 state_prime, reward, next_Time, next_Num, done = env.step(action, gamma_input[i])
                 state = state_prime
-        plt_TimeFTTSC.append(next_Time/10)
+        plt_TimeFTTSC.append(next_Time)
         plt_NumFTTSC.append(next_Num)
         # score = 0.0
         print(plt_TimeFTTSC)
@@ -140,18 +140,20 @@ def main():
 
 if __name__ == '__main__':
     main()
-    plt.plot(gamma_input, plt_NumRLTSC, 'r*-', label='RL')
-    plt.plot(gamma_input, plt_NumFTTSC, 'b^-', label='Fix')
+    plt.figure(1)
+    plt.plot(gamma_input, plt_NumRLTSC, 'r*-', label='RL-TSC')
+    plt.plot(gamma_input, plt_NumFTTSC, 'b^-', label='FIX')
     plt.xlabel('gamma')
     plt.ylabel('Num')
     #plt.ylim([0, 3000])
     plt.legend(loc='best', ncol=1)
-    plt.show()
+    plt.savefig('./gamma(Num).png')
 
-    plt.plot(gamma_input, plt_TimeRLTSC, 'r*-', label='RL')
-    plt.plot(gamma_input, plt_TimeFTTSC, 'b^-', label='Fix/10')
+    plt.figure(2)
+    plt.plot(gamma_input, plt_TimeRLTSC, 'r*-', label='RL-TSC')
+    plt.plot(gamma_input, plt_TimeFTTSC, 'b^-', label='FIX')
     plt.xlabel('gamma')
     plt.ylabel('Time')
     # plt.ylim([0, 3000])
     plt.legend(loc='best', ncol=1)
-    plt.show()
+    plt.savefig('./gamma(Time).png')

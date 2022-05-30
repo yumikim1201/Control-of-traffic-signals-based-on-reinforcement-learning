@@ -1,4 +1,4 @@
-from Environment_Class import Traffic_Signal_Control
+from no_Alpha_env import Traffic_Signal_Control
 import collections
 import random
 import torch
@@ -7,10 +7,12 @@ import torch.nn.functional as F
 import torch.optim as optim
 import matplotlib.pyplot as plt
 
-plt_episodeAve = []
-plt_aveScore = []
-plt_episodeLoss = []
-plt_aveCosts = []
+plt_TimeRLTSC = []
+plt_NumRLTSC = []
+plt_TimeFTTSC = []
+plt_NumFTTSC = []
+
+alpha = [0.3, 0.7]
 
 # Hyperparameters
 learning_rate = 0.0005
@@ -82,9 +84,6 @@ def train(q, q_target, memory, optimizer, n_epi):  # Q-learning으로 학습 -> 
         loss.backward()
         optimizer.step()
 
-    if n_epi % print_interval == 0:
-        plt_aveCosts.append(loss)
-
 
 def main():
     # CartPole 환경 구성
@@ -96,55 +95,67 @@ def main():
     q_target.load_state_dict(q.state_dict())
     memory = ReplayBuffer()
 
-    score = 0.0
     optimizer = optim.Adam(q.parameters(), lr=learning_rate)
+    for i in range(0, 2):
+        score = 0.0
+        for n_epi in range(4000):
+            print(n_epi)
+            epsilon = max(0.01, 0.08 - 0.01 * (n_epi / 200))  # Linear annealing from 8% to 1%
+            state = env.reset()
+            done = False
+            t = 1
+            while not done:
+                action = q.sample_action(torch.tensor(state).float(), epsilon)
+                #print(action)
+                state_prime, reward, next_Time, next_Num, done = env.step(action, alpha[i])  # 선택된 action -> return
+                #print(reward)
+                done_mask = 0.0 if done else 1.0
+                memory.put((state, action, reward, state_prime, done_mask))  # memory append
+                state = state_prime
+                score += reward
+                if done or t == 3000:
+                    break
+                t = t + 1
+            if memory.size() > 2000:  # episode 4회 이상
+                train(q, q_target, memory, optimizer, n_epi)
 
-    for n_epi in range(4000):
-        print(n_epi)
-        epsilon = max(0.01, 0.08 - 0.01 * (n_epi / 200))  # Linear annealing from 8% to 1%
-        state = env.reset()
-        done = False
-        t = 1
-        while not done:
-            action = q.sample_action(torch.tensor(state).float(), epsilon)
-            state_prime, reward, done = env.step(action)  # 선택된 action -> return
-            done_mask = 0.0 if done else 1.0
-            memory.put((state, action, reward, state_prime, done_mask))  # memory append
-            state = state_prime
-            score += reward
-            if done or t == 2000:
-                break
-            t = t + 1
-        if memory.size() > 2000:  # episode 4회 이상
-            train(q, q_target, memory, optimizer, n_epi)
-            if n_epi % print_interval == 0:
-                plt_episodeLoss.append(n_epi)
+            if n_epi % print_interval == 0 and n_epi != 0:
+                q_target.load_state_dict(q.state_dict())
+                score = 0.0
+        plt_TimeRLTSC.append(next_Time)
+        plt_NumRLTSC.append(next_Num)
+        print("time", plt_TimeRLTSC)
+        print("num", plt_NumRLTSC)
 
-        if n_epi % print_interval == 0 and n_epi != 0:
-            q_target.load_state_dict(q.state_dict())
-            plt_episodeAve.append(n_epi)
-            plt_aveScore.append(score / print_interval)
-
-            score = 0.0
+     #   for n_epi in range(100):
+      #      print(n_epi)
+       #     for action in range(0, 8):
+        #        state_prime, reward, next_Time, next_Num, done = env.step(action, alpha[i])
+         #       state = state_prime
+        #plt_TimeFTTSC.append(next_Time)
+        #plt_NumFTTSC.append(next_Num)
+        # score = 0.0
+        #print(plt_TimeFTTSC)
+        #print(plt_NumFTTSC)
     #env.close()
 
 
 if __name__ == '__main__':
     main()
-    print(plt_aveCosts)
     plt.figure(1)
-    plt.plot(plt_episodeAve, plt_aveScore, label = 'reward')
-    plt.xlabel('episode')
-    plt.ylabel('average_reward')
+    plt.plot(alpha, plt_NumRLTSC, 'r*-', label='RL')
+    plt.plot(alpha, plt_NumFTTSC, 'b^-', label='FIX')
+    plt.xlabel('Alpha')
+    plt.ylabel('Num')
+    #plt.ylim([0, 200])
     plt.legend(loc='best', ncol=1)
-    #plt.ylim([-2000, 2000])
-    #plt.show()
-    plt.savefig('./reward.png')
+    plt.savefig('./Alpha(Num).png')
 
     plt.figure(2)
-    plt.plot(plt_episodeLoss, plt_aveCosts, label = 'loss')
-    plt.xlabel('episode')
-    plt.ylabel('Loss')
-    #plt.ylim([0, 1])
-    #plt.show()
-    plt.savefig('./loss.png')
+    plt.plot(alpha, plt_TimeRLTSC, 'r*-', label='RL')
+    plt.plot(alpha, plt_TimeFTTSC, 'b^-', label='Fix')
+    plt.xlabel('Alpha')
+    plt.ylabel('Time')
+    # plt.ylim([0, 3000])
+    plt.legend(loc='best', ncol=1)
+    plt.savefig('./Alpha(Time).png')

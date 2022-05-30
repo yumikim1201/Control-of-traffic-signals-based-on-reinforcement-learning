@@ -6,35 +6,35 @@ K = 30 #한번 신호가 열렸을 때 차량의 처리율
 
 seconds = 30  #신호 주기 == K배 (00초에 1대)
 
+
 class Traffic_Signal_Control():
     def __init__(self):
 
         self.LeftNum = []
-        self.LeftNum.append(1)
-        self.LeftNum.append(1)
-        self.LeftNum.append(1)
-        self.LeftNum.append(1)
+        self.LeftNum.append(10)
+        self.LeftNum.append(10)
+        self.LeftNum.append(10)
+        self.LeftNum.append(10)
 
         self.StraightNum = []
-        self.StraightNum.append(1)
-        self.StraightNum.append(50)
-        self.StraightNum.append(1)
-        self.StraightNum.append(50)
-
+        self.StraightNum.append(10)
+        self.StraightNum.append(100)
+        self.StraightNum.append(10)
+        self.StraightNum.append(100)
 
         self.LeftTime = []
         self.LeftTime.append([])
         for i in range(0, self.LeftNum[0]):
-            self.LeftTime[0].append(1)
+            self.LeftTime[0].append(10)
         self.LeftTime.append([])
         for i in range(0, self.LeftNum[1]):
-            self.LeftTime[1].append(1)
+            self.LeftTime[1].append(10)
         self.LeftTime.append([])
         for i in range(0, self.LeftNum[2]):
-            self.LeftTime[2].append(1)
+            self.LeftTime[2].append(10)
         self.LeftTime.append([])
         for i in range(0, self.LeftNum[3]):
-            self.LeftTime[3].append(1)
+            self.LeftTime[3].append(10)
 
         for i in range(0, 4):
             self.LeftTime[i].sort()
@@ -42,16 +42,16 @@ class Traffic_Signal_Control():
         self.StraightTime = []
         self.StraightTime.append([])
         for i in range(0, self.StraightNum[0]):
-            self.StraightTime[0].append(1)
+            self.StraightTime[0].append(50)
         self.StraightTime.append([])
         for i in range(0, self.StraightNum[1]):
-            self.StraightTime[1].append(50)
+            self.StraightTime[1].append(10)
         self.StraightTime.append([])
         for i in range(0, self.StraightNum[2]):
-            self.StraightTime[2].append(1)
+            self.StraightTime[2].append(50)
         self.StraightTime.append([])
         for i in range(0, self.StraightNum[3]):
-            self.StraightTime[3].append(50)
+            self.StraightTime[3].append(10)
 
         for i in range(0, 4):
             self.StraightTime[i].sort()
@@ -84,8 +84,7 @@ class Traffic_Signal_Control():
 
         return(list_Numsum, list_Timesum)
 
-    def step(self, action):
-        print(action)
+    def step(self, action, alpha):
         list_num, list_time = self.sum_of_state_by_action()
 
         """
@@ -101,7 +100,6 @@ class Traffic_Signal_Control():
         """
         if action == 0:
             self.move_StraightOdd()
-            #print("00000000000000000000")
 
         elif action == 1:
             self.move_StraightEven()
@@ -137,14 +135,12 @@ class Traffic_Signal_Control():
             straightTime += self.StraightTime[i][0]
 
         next_Time = leftTime + straightTime
-        next_Num = self.StraightNum + self.LeftNum
+        next_Num = sum(self.StraightNum + self.LeftNum)
 
-        #reward = - sum(next_Num) #200
-        #reward = - next_Time #300
-        reward = -(0.7 * sum(next_Num) + 0.3 * next_Time)
 
+        reward = -(next_Num + next_Time)
         #print(reward)
-        if reward >= -300:
+        if reward >= -3000:
             done = True
         else:
             done = False
@@ -156,11 +152,11 @@ class Traffic_Signal_Control():
             , self.StraightNum[0], self.StraightNum[1], self.StraightNum[2], self.StraightNum[3]
             , self.LeftTime[0][0], self.LeftTime[1][0], self.LeftTime[2][0], self.LeftTime[3][0]
             , self.StraightTime[0][0], self.StraightTime[1][0], self.StraightTime[2][0], self.StraightTime[3][0]
-        ), reward, done
+        ), reward, next_Time, next_Num, done
 
     def move_StraightOdd(self):
+        gamma = []
         gamma = [5, 40, 5, 40, 5, 5, 5, 5]
-
         self.StraightNum[1] = self.StraightNum[1] - K
         self.StraightNum[3] = self.StraightNum[3] - K
 
@@ -509,30 +505,30 @@ class Traffic_Signal_Control():
     def reset(self):
 
         self.LeftNum = []
-        self.LeftNum.append(1)
-        self.LeftNum.append(1)
-        self.LeftNum.append(1)
-        self.LeftNum.append(1)
+        self.LeftNum.append(10)
+        self.LeftNum.append(10)
+        self.LeftNum.append(10)
+        self.LeftNum.append(10)
 
         self.StraightNum = []
-        self.StraightNum.append(1)
-        self.StraightNum.append(50)
-        self.StraightNum.append(1)
-        self.StraightNum.append(50)
+        self.StraightNum.append(10)
+        self.StraightNum.append(100)
+        self.StraightNum.append(10)
+        self.StraightNum.append(100)
 
         self.LeftTime = []
         self.LeftTime.append([])
         for i in range(0, self.LeftNum[0]):
-            self.LeftTime[0].append(1)
+            self.LeftTime[0].append(10)
         self.LeftTime.append([])
         for i in range(0, self.LeftNum[1]):
-            self.LeftTime[1].append(1)
+            self.LeftTime[1].append(10)
         self.LeftTime.append([])
         for i in range(0, self.LeftNum[2]):
-            self.LeftTime[2].append(1)
+            self.LeftTime[2].append(10)
         self.LeftTime.append([])
         for i in range(0, self.LeftNum[3]):
-            self.LeftTime[3].append(1)
+            self.LeftTime[3].append(10)
 
         for i in range(0, 4):
             self.LeftTime[i].sort()
@@ -540,16 +536,16 @@ class Traffic_Signal_Control():
         self.StraightTime = []
         self.StraightTime.append([])
         for i in range(0, self.StraightNum[0]):
-            self.StraightTime[0].append(1)
+            self.StraightTime[0].append(50)
         self.StraightTime.append([])
         for i in range(0, self.StraightNum[1]):
-            self.StraightTime[1].append(50)
+            self.StraightTime[1].append(10)
         self.StraightTime.append([])
         for i in range(0, self.StraightNum[2]):
-            self.StraightTime[2].append(1)
+            self.StraightTime[2].append(50)
         self.StraightTime.append([])
         for i in range(0, self.StraightNum[3]):
-            self.StraightTime[3].append(50)
+            self.StraightTime[3].append(10)
 
         for i in range(0, 4):
             self.StraightTime[i].sort()
@@ -558,4 +554,4 @@ class Traffic_Signal_Control():
                 , self.StraightNum[0], self.StraightNum[1], self.StraightNum[2], self.StraightNum[3]
                 , self.LeftTime[0][0], self.LeftTime[1][0], self.LeftTime[2][0], self.LeftTime[3][0]
                 , self.StraightTime[0][0], self.StraightTime[1][0], self.StraightTime[2][0], self.StraightTime[3][0]
-               )
+                )
